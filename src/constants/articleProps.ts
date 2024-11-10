@@ -169,11 +169,11 @@ export const fontSizeOptions: OptionType[] = [
 ];
 
 export const defaultArticleState = {
-	fontFamily: fontFamilyOptions[0],
+	fontFamilyOptions: fontFamilyOptions[0],
 	fontColor: fontColors[0],
 	backgroundColor: backgroundColors[0],
 	contentWidth: contentWidthArr[0],
-	fontSize: fontSizeOptions[0],
+	fontSizeOptions: fontSizeOptions[0],
 };
 
 export type ArticleStateType = typeof defaultArticleState;

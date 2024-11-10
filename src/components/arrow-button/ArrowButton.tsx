@@ -1,35 +1,24 @@
-import { useState } from 'react'; // Импортируем useState для состояния
-import arrow from 'src/images/arrow.svg';
+import clsx from 'clsx';
 import styles from './ArrowButton.module.scss';
+import arrow from 'src/images/arrow.svg';
 
-/** Функция для обработки открытия/закрытия формы */
-export type OnClick = () => void;
+export type ArrowButtonProps = {
+	isOpen?: boolean;
+	onClick?: () => void;
+};
 
-export const ArrowButton = ({ onClick }: { onClick?: OnClick }) => {
-	const [isOpen, setIsOpen] = useState(false); // Состояние для отслеживания нажатия
-
-	const handleClick = () => {
-		// Переключаем состояние
-		setIsOpen((prev) => !prev);
-
-		// Если передан onClick, вызываем его
-		if (onClick) {
-			onClick();
-		}
-	};
-
+export const ArrowButton = ({ isOpen, onClick }: ArrowButtonProps) => {
 	return (
 		<div
 			role='button'
 			aria-label='Открыть/Закрыть форму параметров статьи'
 			tabIndex={0}
-			className={`${styles.container} ${isOpen ? styles.container_open : ''}`} // Добавляем класс в зависимости от состояния
-			onClick={handleClick} // При клике вызываем handleClick
-		>
+			className={clsx(styles.container, { [styles.container_open]: isOpen })}
+			onClick={onClick}>
 			<img
 				src={arrow}
 				alt='иконка стрелочки'
-				className={`${styles.arrow} ${isOpen ? styles.arrow_open : ''}`}
+				className={clsx(styles.arrow, { [styles.arrow_open]: isOpen })}
 			/>
 		</div>
 	);

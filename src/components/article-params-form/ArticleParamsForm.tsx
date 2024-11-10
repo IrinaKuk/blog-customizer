@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect, FormEvent } from 'react';
 import { ArrowButton } from 'components/arrow-button';
 import { Button } from 'components/button';
 import clsx from 'clsx';
@@ -24,19 +24,12 @@ interface ArticleParamsFormProps {
 export const ArticleParamsForm = ({ onApply }: ArticleParamsFormProps) => {
 	const [isOpen, setIsOpen] = useState(false);
 
+	const formRef = useRef<HTMLDivElement>(null);
 	const handleArrowClick = () => {
 		setIsOpen((prevState) => !prevState);
 	};
 
-	const initialOptions = {
-		fontFamily: defaultArticleState.fontFamily,
-		fontColor: defaultArticleState.fontColor,
-		backgroundColor: defaultArticleState.backgroundColor,
-		contentWidth: defaultArticleState.contentWidth,
-		fontSize: defaultArticleState.fontSize,
-	};
-
-	const [selectedOptions, setSelectedOptions] = useState(initialOptions);
+	const [selectedOptions, setSelectedOptions] = useState(defaultArticleState);
 
 	const handleSelectChange = (field: string) => (option: OptionType) => {
 		setSelectedOptions((prevState) => ({
@@ -46,35 +39,60 @@ export const ArticleParamsForm = ({ onApply }: ArticleParamsFormProps) => {
 	};
 
 	const handleReset = () => {
-		setSelectedOptions(initialOptions);
-		onApply(initialOptions);
+		setSelectedOptions(defaultArticleState);
+		onApply(defaultArticleState);
 	};
 
-	const handleSubmit = () => {
+	const handleSubmit = (event: FormEvent) => {
 		onApply(selectedOptions);
+		event?.preventDefault();
 	};
+
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (formRef.current && !formRef.current.contains(event.target as Node)) {
+				setIsOpen(false);
+			}
+		};
+
+		document.addEventListener('click', handleClickOutside);
+
+		return () => {
+			document.removeEventListener('click', handleClickOutside);
+		};
+	}, []);
 
 	return (
-		<>
-			<ArrowButton onClick={handleArrowClick} />
+		<div ref={formRef}>
+			<ArrowButton onClick={handleArrowClick} isOpen={isOpen} />
 			<aside
 				className={clsx(styles.container, { [styles.container_open]: isOpen })}>
-				<form className={styles.form}>
+				<form
+					className={styles.form}
+					onSubmit={handleSubmit}
+					onReset={handleReset}>
 					<Text size={31} uppercase weight={800}>
 						Задайте параметры
 					</Text>
 					<Select
 						title='Шрифт'
-						selected={selectedOptions.fontFamily}
+						selected={selectedOptions.fontFamilyOptions}
 						options={fontFamilyOptions}
-						placeholder={defaultArticleState.fontFamily.value}
-						onChange={handleSelectChange('fontFamily')}
+						placeholder={'выбор шрифта'}
+						onChange={handleSelectChange('fontFamilyOptions')}
+					/>
+					<RadioGroup
+						title='Размер шрифта'
+						name='font-size'
+						options={fontSizeOptions}
+						selected={selectedOptions.fontSizeOptions}
+						onChange={handleSelectChange('fontSizeOptions')}
 					/>
 					<Select
 						title='Цвет шрифта'
 						selected={selectedOptions.fontColor}
 						options={fontColors}
-						placeholder={defaultArticleState.fontColor.value}
+						placeholder={'выбор цвета шрифта'}
 						onChange={handleSelectChange('fontColor')}
 					/>
 					<Separator />
@@ -82,29 +100,22 @@ export const ArticleParamsForm = ({ onApply }: ArticleParamsFormProps) => {
 						title='Цвет фона'
 						selected={selectedOptions.backgroundColor}
 						options={backgroundColors}
-						placeholder={defaultArticleState.backgroundColor.value}
+						placeholder={'выбор цвета фона'}
 						onChange={handleSelectChange('backgroundColor')}
 					/>
 					<Select
 						title='Ширина контента'
 						selected={selectedOptions.contentWidth}
 						options={contentWidthArr}
-						placeholder={defaultArticleState.contentWidth.value}
+						placeholder={'выбор ширины контента'}
 						onChange={handleSelectChange('contentWidth')}
 					/>
-					<RadioGroup
-						title='Размер шрифта'
-						name='font-size'
-						options={fontSizeOptions}
-						selected={selectedOptions.fontSize}
-						onChange={handleSelectChange('fontSize')}
-					/>
 					<div className={styles.bottomContainer}>
-						<Button title='Сбросить' type='reset' onClick={handleReset} />
-						<Button title='Применить' type='button' onClick={handleSubmit} />
+						<Button title='Сбросить' type='reset' />
+						<Button title='Применить' type='submit' />
 					</div>
 				</form>
 			</aside>
-		</>
+		</div>
 	);
 };
