@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, FormEvent } from 'react';
+import { useState, useRef, FormEvent } from 'react';
 import { ArrowButton } from 'components/arrow-button';
 import { Button } from 'components/button';
 import clsx from 'clsx';
@@ -16,6 +16,7 @@ import {
 	defaultArticleState,
 } from 'src/constants/articleProps';
 import { RadioGroup } from '../radio-group';
+import { useOutsideClickClose } from '../select/hooks/useOutsideClickClose';
 
 interface ArticleParamsFormProps {
 	onApply: (options: typeof defaultArticleState) => void;
@@ -23,7 +24,6 @@ interface ArticleParamsFormProps {
 
 export const ArticleParamsForm = ({ onApply }: ArticleParamsFormProps) => {
 	const [isOpen, setIsOpen] = useState(false);
-
 	const formRef = useRef<HTMLDivElement>(null);
 	const handleArrowClick = () => {
 		setIsOpen((prevState) => !prevState);
@@ -48,19 +48,12 @@ export const ArticleParamsForm = ({ onApply }: ArticleParamsFormProps) => {
 		event?.preventDefault();
 	};
 
-	useEffect(() => {
-		const handleClickOutside = (event: MouseEvent) => {
-			if (formRef.current && !formRef.current.contains(event.target as Node)) {
-				setIsOpen(false);
-			}
-		};
-
-		document.addEventListener('click', handleClickOutside);
-
-		return () => {
-			document.removeEventListener('click', handleClickOutside);
-		};
-	}, []);
+	useOutsideClickClose({
+		isOpen,
+		rootRef: formRef,
+		onClose: () => setIsOpen(false),
+		onChange: setIsOpen,
+	});
 
 	return (
 		<div ref={formRef}>
